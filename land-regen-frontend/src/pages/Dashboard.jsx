@@ -1,61 +1,100 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
-import PlotMap from "../components/PlotMap";
+import { supabase } from "../supabaseClient";
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
+import L from "leaflet";
+
+// Fix default Leaflet marker icons
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+});
 
 export default function Dashboard() {
-  const [plots, setPlots] = useState([]);
+  const [trees, setTrees] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Fetch plots from FastAPI backend
-    axios
-      .get(`${import.meta.env.VITE_API_URL}/plots/`)
-      .then((res) => setPlots(res.data))
-      .catch((err) => console.error("Error fetching plots:", err));
+    const fetchTrees = async () => {
+      setLoading(true);
+      const { data, error } = await supabase.from("trees").select("*");
+
+      if (error) {
+        console.error("Error fetching trees:", error);
+      } else {
+        setTrees(data);
+      }
+      setLoading(false);
+    };
+
+    fetchTrees();
   }, []);
 
   return (
-    <div className="p-6 space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold text-green-700 mb-2">
-          🌿 Tree Mapping Dashboard
-        </h1>
-        <p className="text-gray-600">
-          Explore all planted trees, add new ones, and track regeneration activity in real time.
-        </p>
+    <div className="p-6 space-y-6">
+      <h1 className="text-2xl font-bold text-green-700">
+        🌿 Tree Tracking Dashboard
+      </h1>
+      <p className="text-gray-600">
+        View all planted trees, their coordinates, and who planted them.
+      </p>
+
+      {/* Map Section */}
+      <div className="h-[500px] rounded-xl overflow-hidden shadow-md">
+        <MapContainer
+          center={[-1.286389, 36.817223]} // Nairobi default center
+          zoom={8}
+          className="h-full w-full"
+        >
+          <TileLayer
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            attribution='© OpenStreetMap contributors'
+          />
+
+          {trees.map((tree) => (
+            <Marker
+              key={tree.id}
+              position={[tree.latitude, tree.longitude]}
+              title={tree.species}
+            >
+              <Popup>
+                <strong>{tree.species}</strong> <br />
+                🌱 Planted by: {tree.planted_by} <br />
+                👩🏽‍🌾 Planter: {tree.planter} <br />
+                📍 Lat: {tree.latitude.toFixed(5)}, Lon: {tree.longitude.toFixed(5)}
+              </Popup>
+            </Marker>
+          ))}
+        </MapContainer>
       </div>
 
-      {/* Interactive Map */}
-      <PlotMap plots={plots} />
-
-      {/* Plot Summary Cards */}
+      {/* Tree List Section */}
       <div>
-        <h2 className="text-xl font-semibold text-gray-800 mb-4">Your Plots</h2>
-        {plots.length > 0 ? (
-          <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-            {plots.map((plot) => (
+        <h2 className="text-lg font-semibold mt-6 mb-3">All Trees</h2>
+        {loading ? (
+          <p>Loading trees...</p>
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+            {trees.map((tree) => (
               <div
-                key={plot.id}
-                className="bg-white rounded-xl p-4 shadow hover:shadow-md border border-gray-100 transition"
+                key={tree.id}
+                className="bg-white p-4 rounded-xl shadow hover:shadow-lg transition"
               >
-                <h3 className="text-lg font-bold text-green-700">{plot.name}</h3>
-                <p className="text-sm text-gray-600 mt-1">Soil: {plot.soil_type || "N/A"}</p>
-                <p className="text-sm text-gray-600">Area: {plot.area_ha || "0"} ha</p>
-                <p className="text-sm text-gray-600">
-                  Coordinates:{" "}
-                  {plot.latitude && plot.longitude
-                    ? `${plot.latitude.toFixed(3)}, ${plot.longitude.toFixed(3)}`
-                    : "N/A"}
+                <h3 className="font-bold text-green-700">{tree.species}</h3>
+                <p>Planted by: {tree.planted_by}</p>
+                <p>Planter: {tree.planter}</p>
+                <p>
+                  Location: {tree.latitude.toFixed(4)}, {tree.longitude.toFixed(4)}
                 </p>
               </div>
             ))}
           </div>
-        ) : (
-          <p className="text-gray-500 italic mt-4">
-            No plots yet. Add one through your dashboard or API.
-          </p>
         )}
       </div>
     </div>
   );
 }
+
 
