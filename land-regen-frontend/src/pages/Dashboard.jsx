@@ -1,16 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../supabaseClient";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
-import "leaflet/dist/leaflet.css";
-import L from "leaflet";
-
-// Fix default Leaflet marker icons
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-});
+import MapView from "../components/MapView";
 
 export default function Dashboard() {
   const [trees, setTrees] = useState([]);
@@ -19,10 +9,21 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchTrees = async () => {
       setLoading(true);
-      const { data, error } = await supabase.from("trees").select("*");
+      const { data, error } = await supabase
+        .from("trees")
+        .select(`
+          id,
+          species,
+          latitude,
+          longitude,
+          planted_by,
+          planted_at,
+          users:planter_id (name, email),
+          plots:plot_id (name, region)
+        `);
 
       if (error) {
-        console.error("Error fetching trees:", error);
+        console.error("Error fetching trees:", error.message);
       } else {
         setTrees(data);
       }
@@ -32,69 +33,54 @@ export default function Dashboard() {
     fetchTrees();
   }, []);
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-gray-50">
+        <h2 className="text-lg text-gray-600 animate-pulse">
+          🌱 Loading your trees...
+        </h2>
+      </div>
+    );
+  }
+
   return (
-    <div className="p-6 space-y-6">
-      <h1 className="text-2xl font-bold text-green-700">
-        🌿 Tree Tracking Dashboard
-      </h1>
-      <p className="text-gray-600">
-        View all planted trees, their coordinates, and who planted them.
+    <div className="p-8 space-y-6">
+      <h1 className="text-2xl font-bold text-green-700">🌿 Tree Mapping Dashboard</h1>
+      <p className="text-gray-600 mb-4">
+        View planted trees, their planters, and plots across regions.
       </p>
 
-      {/* Map Section */}
-      <div className="h-[500px] rounded-xl overflow-hidden shadow-md">
-        <MapContainer
-          center={[-1.286389, 36.817223]} // Nairobi default center
-          zoom={8}
-          className="h-full w-full"
-        >
-          <TileLayer
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            attribution='© OpenStreetMap contributors'
-          />
-
-          {trees.map((tree) => (
-            <Marker
-              key={tree.id}
-              position={[tree.latitude, tree.longitude]}
-              title={tree.species}
-            >
-              <Popup>
-                <strong>{tree.species}</strong> <br />
-                🌱 Planted by: {tree.planted_by} <br />
-                👩🏽‍🌾 Planter: {tree.planter} <br />
-                📍 Lat: {tree.latitude.toFixed(5)}, Lon: {tree.longitude.toFixed(5)}
-              </Popup>
-            </Marker>
-          ))}
-        </MapContainer>
+      {/* Map section */}
+      <div className="border rounded-2xl overflow-hidden shadow-lg h-[500px]">
+        <MapView trees={trees} />
       </div>
 
-      {/* Tree List Section */}
-      <div>
-        <h2 className="text-lg font-semibold mt-6 mb-3">All Trees</h2>
-        {loading ? (
-          <p>Loading trees...</p>
-        ) : (
-          <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
-            {trees.map((tree) => (
-              <div
-                key={tree.id}
-                className="bg-white p-4 rounded-xl shadow hover:shadow-lg transition"
-              >
-                <h3 className="font-bold text-green-700">{tree.species}</h3>
-                <p>Planted by: {tree.planted_by}</p>
-                <p>Planter: {tree.planter}</p>
-                <p>
-                  Location: {tree.latitude.toFixed(4)}, {tree.longitude.toFixed(4)}
-                </p>
-              </div>
-            ))}
+      {/* Tree Cards section */}
+      <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3">
+        {trees.map((tree) => (
+          <div
+            key={tree.id}
+            className="bg-white p-4 rounded-xl shadow hover:shadow-md transition"
+          >
+            <h2 className="text-lg font-bold text-green-700">{tree.species}</h2>
+            <p className="text-sm text-gray-500 mb-2">
+              <strong>Planted by:</strong>{" "}
+              {tree.users?.name || "Unknown"} ({tree.users?.email || "No email"})
+            </p>
+            <p className="text-sm text-gray-500">
+              <strong>Plot:</strong> {tree.plots?.name || "Unassigned"} –{" "}
+              {tree.plots?.region || "Unknown region"}
+            </p>
+            <p className="text-sm text-gray-500">
+              <strong>Coordinates:</strong>{" "}
+              {tree.latitude?.toFixed(4)}, {tree.longitude?.toFixed(4)}
+            </p>
+            <p className="text-xs text-gray-400 mt-2">
+              🌱 Planted on {new Date(tree.planted_at).toLocaleDateString()}
+            </p>
           </div>
-        )}
+        ))}
       </div>
     </div>
   );
 }
-
-
