@@ -1,89 +1,54 @@
-import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
-import { useEffect, useState } from "react";
-import { supabase } from "../supabaseClient";
 import L from "leaflet";
 
-// Simple green marker icon
-const treeIcon = new L.Icon({
-  iconUrl: "https://cdn-icons-png.flaticon.com/512/427/427735.png",
-  iconSize: [32, 32],
+// Fix Leaflet marker icon bug in Vite
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl:
+    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
 });
 
-export default function MapView() {
-  const [trees, setTrees] = useState([]);
-  const [newLocation, setNewLocation] = useState(null);
-
-  // Fetch trees from Supabase
-  const fetchTrees = async () => {
-    const { data, error } = await supabase.from("trees").select("*");
-    if (!error) setTrees(data);
-  };
-
-  useEffect(() => {
-    fetchTrees();
-  }, []);
-
-  // Capture click location
-  const MapClickHandler = () => {
-    useMapEvents({
-      click(e) {
-        setNewLocation(e.latlng);
-      },
-    });
-    return null;
-  };
-
-  // Add new tree to Supabase
-  const addTree = async () => {
-    if (!newLocation) return;
-    const { data, error } = await supabase
-      .from("trees")
-      .insert([{ latitude: newLocation.lat, longitude: newLocation.lng }]);
-    if (!error) {
-      alert("🌳 New tree added!");
-      fetchTrees();
-      setNewLocation(null);
-    }
-  };
+export default function MapView({ trees = [] }) {
+  const center = trees.length
+    ? [trees[0].latitude, trees[0].longitude]
+    : [-1.286389, 36.817223]; // Default Nairobi
 
   return (
-    <div className="w-full h-[80vh] rounded-2xl overflow-hidden shadow-lg border border-gray-200">
-      <MapContainer
-        center={[-1.2921, 36.8219]} // Nairobi default
-        zoom={8}
-        className="w-full h-full"
-      >
-        <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution='© OpenStreetMap contributors'
-        />
-        <MapClickHandler />
-        {trees.map((tree) => (
-          <Marker
-            key={tree.id}
-            position={[tree.latitude, tree.longitude]}
-            icon={treeIcon}
-          >
-            <Popup>
-              🌱 Tree #{tree.id} <br /> Lat: {tree.latitude.toFixed(3)}, Lng:{" "}
-              {tree.longitude.toFixed(3)}
-            </Popup>
-          </Marker>
-        ))}
-        {newLocation && (
-          <Marker position={[newLocation.lat, newLocation.lng]} icon={treeIcon}>
-            <Popup>
-              <button
-                onClick={addTree}
-                className="bg-green-600 text-white px-2 py-1 rounded"
-              >
-                Add Tree Here
-              </button>
-            </Popup>
-          </Marker>
-        )}
-      </MapContainer>
-    </div>
+    <MapContainer center={center} zoom={6} className="h-full w-full">
+      <TileLayer
+        attribution='© OpenStreetMap contributors'
+        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+      />
+
+      {trees.map((tree) => (
+        <Marker
+          key={tree.id}
+          position={[tree.latitude, tree.longitude]}
+          title={tree.species}
+        >
+          <Popup>
+            <div>
+              <h3 className="font-bold text-green-700">{tree.species}</h3>
+              <p>
+                <strong>Planted by:</strong> {tree.users?.name || "Unknown"}
+              </p>
+              <p>
+                <strong>Plot:</strong> {tree.plots?.name || "Unassigned"}
+              </p>
+              <p>
+                <strong>Coords:</strong>{" "}
+                {tree.latitude.toFixed(4)}, {tree.longitude.toFixed(4)}
+              </p>
+              <p className="text-xs text-gray-400 mt-1">
+                {new Date(tree.planted_at).toLocaleDateString()}
+              </p>
+            </div>
+          </Popup>
+        </Marker>
+      ))}
+    </MapContainer>
   );
 }
