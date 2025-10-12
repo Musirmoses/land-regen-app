@@ -1,133 +1,124 @@
+// src/pages/AddTree.jsx
 import { useState } from "react";
-import { supabase } from "../supabaseClient";
+import { supabase } from "../lib/supabaseClient";
 
 export default function AddTree() {
-  const [formData, setFormData] = useState({
-    species: "",
-    latitude: "",
-    longitude: "",
-    planted_by: "",
-    planter: "",
-  });
+  const [species, setSpecies] = useState("");
+  const [latitude, setLatitude] = useState("");
+  const [longitude, setLongitude] = useState("");
+  const [planterId, setPlanterId] = useState("");
+  const [plotId, setPlotId] = useState("");
   const [status, setStatus] = useState("");
-
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setStatus("Submitting...");
 
-    const { species, latitude, longitude, planted_by, planter } = formData;
+    if (!species || !latitude || !longitude || !planterId) {
+      alert("Please fill all required fields.");
+      return;
+    }
 
     const { data, error } = await supabase.from("trees").insert([
       {
         species,
         latitude: parseFloat(latitude),
         longitude: parseFloat(longitude),
-        planted_by,
-        planter,
+        planter: planterId, // foreign key to planters.id
+        planted_by: "Land ReGen Demo Team",
+        plot_id: plotId || null,
+        status: "planted",
       },
     ]);
 
     if (error) {
-      console.error("Supabase error:", error);
-      setStatus(`Error: ${error.message}`);
+      console.error("Error inserting tree:", error.message);
+      setStatus("❌ Failed to add tree.");
     } else {
+      console.log("Inserted:", data);
       setStatus("✅ Tree added successfully!");
-      setFormData({
-        species: "",
-        latitude: "",
-        longitude: "",
-        planted_by: "",
-        planter: "",
-      });
+      setSpecies("");
+      setLatitude("");
+      setLongitude("");
+      setPlanterId("");
+      setPlotId("");
     }
   };
 
   return (
-    <div className="max-w-lg mx-auto p-6 bg-white rounded-xl shadow-md mt-10">
-      <h2 className="text-2xl font-bold text-green-700 mb-4">🌳 Add a New Tree</h2>
+    <div className="max-w-lg mx-auto p-6 bg-white rounded-xl shadow-md space-y-4">
+      <h2 className="text-2xl font-semibold text-green-700">🌱 Add New Tree</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-gray-700 font-medium">Species</label>
+          <label className="block text-gray-600 font-medium">Species</label>
           <input
             type="text"
-            name="species"
-            value={formData.species}
-            onChange={handleChange}
-            className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-400"
-            placeholder="e.g. Moringa Oleifera"
+            value={species}
+            onChange={(e) => setSpecies(e.target.value)}
+            className="w-full border rounded-lg px-3 py-2"
+            placeholder="Moringa Oleifera"
             required
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-gray-700 font-medium">Latitude</label>
+            <label className="block text-gray-600 font-medium">Latitude</label>
             <input
               type="number"
               step="any"
-              name="latitude"
-              value={formData.latitude}
-              onChange={handleChange}
-              className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-400"
-              placeholder="-1.28333"
+              value={latitude}
+              onChange={(e) => setLatitude(e.target.value)}
+              className="w-full border rounded-lg px-3 py-2"
+              placeholder="-1.2921"
               required
             />
           </div>
-
           <div>
-            <label className="block text-gray-700 font-medium">Longitude</label>
+            <label className="block text-gray-600 font-medium">Longitude</label>
             <input
               type="number"
               step="any"
-              name="longitude"
-              value={formData.longitude}
-              onChange={handleChange}
-              className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-400"
-              placeholder="36.81667"
+              value={longitude}
+              onChange={(e) => setLongitude(e.target.value)}
+              className="w-full border rounded-lg px-3 py-2"
+              placeholder="36.8219"
               required
             />
           </div>
         </div>
 
         <div>
-          <label className="block text-gray-700 font-medium">Planted By</label>
+          <label className="block text-gray-600 font-medium">Planter ID</label>
           <input
             type="text"
-            name="planted_by"
-            value={formData.planted_by}
-            onChange={handleChange}
-            className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-400"
-            placeholder="Land ReGen Team"
+            value={planterId}
+            onChange={(e) => setPlanterId(e.target.value)}
+            className="w-full border rounded-lg px-3 py-2"
+            placeholder="UUID of planter"
             required
           />
         </div>
 
         <div>
-          <label className="block text-gray-700 font-medium">Planter</label>
+          <label className="block text-gray-600 font-medium">Plot ID (optional)</label>
           <input
             type="text"
-            name="planter"
-            value={formData.planter}
-            onChange={handleChange}
-            className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-400"
-            placeholder="Demo User"
-            required
+            value={plotId}
+            onChange={(e) => setPlotId(e.target.value)}
+            className="w-full border rounded-lg px-3 py-2"
+            placeholder="UUID of plot"
           />
         </div>
 
         <button
           type="submit"
-          className="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition"
+          className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 rounded-lg"
         >
           Add Tree
         </button>
       </form>
 
-      {status && <p className="mt-4 text-center text-sm text-gray-700">{status}</p>}
+      {status && <p className="text-center text-sm text-gray-600">{status}</p>}
     </div>
   );
 }
