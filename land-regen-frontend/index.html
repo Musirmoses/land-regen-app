@@ -3,57 +3,71 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Land Regen 🌍 | Building a Green Future</title>
+    <title>Land Regen 🌿 | Building a Green Future</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="stylesheet" href="/style.css" />
   </head>
 
-  <body class="bg-green-50 text-gray-900">
-    <header class="hero">
-      <div class="hero-content text-center py-20">
-        <h1 class="text-5xl font-extrabold mb-4 text-green-700">
-          🌿 Land Regen
-        </h1>
-        <p class="text-lg mb-6 max-w-xl mx-auto">
-          Together we’re regenerating land, restoring biodiversity, and securing
-          a sustainable planet. <br />
-          <strong>Building a Green Future — SDG 15: Life on Land</strong>
-        </p>
+  <body class="bg-gradient-to-b from-green-50 to-white text-gray-800">
+    <header class="hero flex flex-col items-center justify-center text-center py-24">
+      <h1 class="text-6xl font-extrabold text-green-700 mb-4">Land Regen</h1>
+      <p class="text-lg md:text-xl text-gray-700 max-w-2xl mb-8">
+        Reclaiming our planet — one root at a time. Join us in restoring life to the land,
+        empowering communities, and advancing <strong>SDG 15: Life on Land</strong>.
+      </p>
 
-        <div class="flex justify-center gap-4">
-          <a
-            href="/dashboard"
-            class="btn bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-3 rounded-lg shadow-md transition-all"
-          >
-            🌍 Go to Dashboard
-          </a>
-
-          <a
-            href="/adopt"
-            class="btn bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-6 py-3 rounded-lg shadow-md transition-all"
-          >
-            🌱 Adopt a Tree
-          </a>
-        </div>
+      <div class="flex flex-wrap justify-center gap-4">
+        <a
+          href="/dashboard"
+          class="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-3 rounded-full shadow-md transition-all"
+        >
+          🌍 Dashboard
+        </a>
+        <a
+          href="/plant"
+          class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-6 py-3 rounded-full shadow-md transition-all"
+        >
+          🌱 Plant a Tree
+        </a>
+        <a
+          href="/adopt"
+          class="bg-lime-600 hover:bg-lime-700 text-white font-semibold px-6 py-3 rounded-full shadow-md transition-all"
+        >
+          🌿 Adopt a Tree
+        </a>
       </div>
     </header>
 
-    <main class="text-center p-10">
-      <section class="max-w-4xl mx-auto">
-        <h2 class="text-2xl font-bold mb-4 text-green-800">
-          Why Land Regen?
-        </h2>
+    <main class="px-6 py-12 text-center">
+      <section class="max-w-4xl mx-auto mb-12">
+        <h2 class="text-3xl font-bold text-green-800 mb-4">Our Mission</h2>
         <p class="text-gray-700 leading-relaxed">
-          Land Regen is a digital ecosystem that connects planters, organizations,
-          and environmental stewards to monitor and regenerate degraded land.
-          Through verified planting data, location mapping, and adoption models,
-          we empower communities to achieve tangible climate impact.
+          Land Regen is a digital ecosystem built to track, visualize, and sustain land restoration projects.
+          By connecting planters, organizations, and environmental champions, we drive verified, community-led
+          regeneration efforts — blending technology and impact for a greener tomorrow.
         </p>
+      </section>
+
+      <section class="max-w-5xl mx-auto grid md:grid-cols-3 gap-6 text-left">
+        <div class="p-6 rounded-xl bg-green-50 shadow-sm">
+          <h3 class="text-xl font-semibold text-green-700 mb-2">Track Restoration</h3>
+          <p class="text-gray-600">Visualize restoration sites on dynamic maps and monitor their progress over time.</p>
+        </div>
+        <div class="p-6 rounded-xl bg-green-50 shadow-sm">
+          <h3 class="text-xl font-semibold text-green-700 mb-2">Empower Planters</h3>
+          <p class="text-gray-600">Provide tools for local communities and organizations to showcase verified impact.</p>
+        </div>
+        <div class="p-6 rounded-xl bg-green-50 shadow-sm">
+          <h3 class="text-xl font-semibold text-green-700 mb-2">Adopt Trees</h3>
+          <p class="text-gray-600">
+            Support ongoing reforestation projects by adopting trees and contributing to their care.
+          </p>
+        </div>
       </section>
     </main>
 
-    <footer class="text-center py-6 border-t mt-10 text-sm text-gray-600">
-      © 2025 Land Regen — Reclaiming our planet, one root at a time.
+    <footer class="text-center py-8 border-t text-sm text-gray-600">
+      © 2025 Land Regen — Growing together for a sustainable future 🌱
     </footer>
 
     <script type="module" src="/src/main.jsx"></script>
