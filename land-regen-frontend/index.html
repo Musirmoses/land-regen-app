@@ -1,36 +1,52 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Land ReGen — Building a Green Future</title>
+    <title>Land Regen 🌍 | Restoring Ecosystems, One Tree at a Time</title>
   </head>
+  <body class="bg-green-50 text-gray-800">
+    <div id="root"></div>
 
-  <body class="bg-gray-50">
-    <section class="bg-green-100 py-16 text-center">
-      <h1 class="text-4xl font-bold text-green-800 mb-4">🌍 Land ReGen</h1>
-      <p class="text-lg text-gray-700 mb-6">
-        Encouraging tree planting to sustain our planet. Together, we can build a greener future.
+    <!-- Simple static fallback (for Netlify or direct open) -->
+    <noscript>
+      <p style="text-align: center; padding: 2rem; font-size: 1.2rem;">
+        This site requires JavaScript to run the Land Regen dashboard.
       </p>
-      <div class="space-x-4">
-        <a
-          href="/add-tree"
-          class="bg-green-600 text-white px-6 py-3 rounded-xl hover:bg-green-700 transition"
-        >
-          🌱 Plant a Tree
-        </a>
-        <a
-          href="/adopt"
-          class="bg-white border border-green-600 text-green-700 px-6 py-3 rounded-xl hover:bg-green-50 transition"
-        >
-          🌿 Adopt a Tree
-        </a>
-      </div>
+    </noscript>
+
+    <!-- Optional static header before React mounts -->
+    <header class="w-full text-center py-6 bg-green-700 text-white shadow-md">
+      <h1 class="text-3xl font-bold">🌿 Land Regen</h1>
+      <p class="text-sm opacity-90">Restoring ecosystems, one tree at a time</p>
+    </header>
+
+    <!-- Call-to-Action Section -->
+    <section class="flex flex-col items-center justify-center text-center p-8">
+      <h2 class="text-2xl font-semibold mb-3">
+        Join our mission to regenerate degraded lands
+      </h2>
+      <p class="max-w-xl mb-6 text-gray-600">
+        Adopt a tree, track its growth, and contribute to a greener planet aligned
+        with <strong>SDG 15: Life on Land</strong>.
+      </p>
+
+      <!-- 🌱 Adopt a Tree Button -->
+      <a
+        href="/adopt"
+        class="btn btn-primary bg-green-600 hover:bg-green-700 text-white font-medium px-6 py-3 rounded-lg shadow-lg transition-all"
+      >
+        🌱 Adopt a Tree
+      </a>
     </section>
 
-    <div id="root"></div>
+    <!-- Footer -->
+    <footer class="text-center py-6 text-sm text-gray-500 border-t mt-8">
+      © 2025 Land Regen — Reclaiming our planet, one root at a time.
+    </footer>
+
+    <!-- React Mount -->
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
-
