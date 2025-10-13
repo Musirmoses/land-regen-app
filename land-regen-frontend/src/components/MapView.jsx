@@ -1,36 +1,23 @@
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
-import "leaflet/dist/leaflet.css";
-import L from "leaflet";
-
-const treeIcon = new L.Icon({
-  iconUrl: "https://cdn-icons-png.flaticon.com/512/427/427735.png",
-  iconSize: [30, 30],
-});
 
 export default function MapView({ trees }) {
   return (
-    <MapContainer
-      center={[-1.2921, 36.8219]}
-      zoom={7}
-      style={{ height: "500px", width: "100%" }}
-    >
-      <TileLayer
-        attribution='&copy; OpenStreetMap contributors'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
-      {trees?.map((tree) => (
-        <Marker
-          key={tree.id}
-          position={[tree.latitude, tree.longitude]}
-          icon={treeIcon}
-        >
-          <Popup>
-            <strong>{tree.species}</strong><br />
-            Planted by: {tree.planted_by}<br />
-            Status: {tree.adopted ? "Adopted 🌿" : "Available 🌱"}
-          </Popup>
-        </Marker>
-      ))}
-    </MapContainer>
+    <div className="h-[400px] w-full rounded-xl overflow-hidden shadow">
+      <MapContainer center={[-1.286389, 36.817223]} zoom={7} className="h-full w-full">
+        <TileLayer
+          attribution="© OpenStreetMap"
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
+        {trees.map((tree) => (
+          <Marker key={tree.id} position={[tree.latitude, tree.longitude]}>
+            <Popup>
+              <b>{tree.species}</b><br />
+              Planter: {tree.planter}<br />
+              Planted By: {tree.planted_by}
+            </Popup>
+          </Marker>
+        ))}
+      </MapContainer>
+    </div>
   );
 }
