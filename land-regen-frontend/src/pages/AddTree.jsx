@@ -5,71 +5,66 @@ export default function AddTree() {
   const [species, setSpecies] = useState("");
   const [latitude, setLatitude] = useState("");
   const [longitude, setLongitude] = useState("");
-  const [planter, setPlanter] = useState("");
+  const [plantedBy, setPlantedBy] = useState("");
   const [message, setMessage] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const { error } = await supabase.from("trees").insert([
-      {
-        species,
-        latitude: parseFloat(latitude),
-        longitude: parseFloat(longitude),
-        planted_by: "Land ReGen Team",
-        planter,
-      },
-    ]);
+    const { error } = await supabase
+      .from("trees")
+      .insert([{ species, latitude, longitude, planted_by: plantedBy, adopted: false }]);
     if (error) {
-      setMessage(`❌ Error: ${error.message}`);
+      setMessage("❌ Error planting tree: " + error.message);
     } else {
-      setMessage("✅ Tree successfully added!");
+      setMessage("✅ Tree added successfully!");
       setSpecies("");
       setLatitude("");
       setLongitude("");
-      setPlanter("");
+      setPlantedBy("");
     }
   };
 
   return (
-    <div className="p-8">
-      <h1 className="text-2xl font-bold text-green-700 mb-6">🌱 Add a New Tree</h1>
-      <form onSubmit={handleSubmit} className="space-y-4 max-w-md">
+    <div className="container mx-auto py-10">
+      <h2 className="text-3xl font-bold mb-6 text-center text-green-700">🌱 Plant a Tree</h2>
+      <form onSubmit={handleSubmit} className="max-w-md mx-auto bg-white shadow-lg rounded-lg p-6">
         <input
-          className="w-full p-3 border rounded-xl"
+          type="text"
           placeholder="Tree Species"
           value={species}
           onChange={(e) => setSpecies(e.target.value)}
+          className="border p-2 w-full mb-4 rounded"
           required
         />
         <input
-          className="w-full p-3 border rounded-xl"
+          type="text"
           placeholder="Latitude"
           value={latitude}
           onChange={(e) => setLatitude(e.target.value)}
+          className="border p-2 w-full mb-4 rounded"
           required
         />
         <input
-          className="w-full p-3 border rounded-xl"
+          type="text"
           placeholder="Longitude"
           value={longitude}
           onChange={(e) => setLongitude(e.target.value)}
+          className="border p-2 w-full mb-4 rounded"
           required
         />
         <input
-          className="w-full p-3 border rounded-xl"
-          placeholder="Planter Name"
-          value={planter}
-          onChange={(e) => setPlanter(e.target.value)}
+          type="text"
+          placeholder="Planted By"
+          value={plantedBy}
+          onChange={(e) => setPlantedBy(e.target.value)}
+          className="border p-2 w-full mb-4 rounded"
           required
         />
-        <button
-          type="submit"
-          className="bg-green-600 text-white px-6 py-3 rounded-xl hover:bg-green-700 transition"
-        >
-          Submit
+        <button type="submit" className="bg-green-600 text-white px-4 py-2 rounded w-full">
+          Add Tree
         </button>
       </form>
-      {message && <p className="mt-4 text-green-700">{message}</p>}
+      {message && <p className="text-center mt-4 text-green-600">{message}</p>}
     </div>
   );
 }
