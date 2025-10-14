@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { supabase } from "../lib/supabaseClient";
 import AddTree from "./AddTree";
-import Map from "./Map";
+import MapView from "./Map";
+
 
 export default function Dashboard() {
   const [trees, setTrees] = useState([]);
