@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
-import { supabase } from "../lib/supabaseClient";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
+import { FaTree, FaSeedling } from "react-icons/fa";
+import { motion } from "framer-motion";
 
-// Fix default marker icons
+// Map marker icon setup
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl:
@@ -15,76 +16,68 @@ L.Icon.Default.mergeOptions({
     "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
 });
 
-export default function Dashboard() {
-  const [trees, setTrees] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  // Fetch all trees from Supabase
-  useEffect(() => {
-    const fetchTrees = async () => {
-      const { data, error } = await supabase.from("trees").select("*");
-      if (error) {
-        console.error("Error fetching trees:", error);
-      } else {
-        setTrees(data);
-      }
-      setLoading(false);
-    };
-    fetchTrees();
-  }, []);
-
-  if (loading) {
-    return <p className="text-center mt-8 text-gray-500">Loading map...</p>;
-  }
+const Dashboard = () => {
+  const [trees] = useState([
+    { id: 1, species: "Acacia", plantedBy: "John", position: [-1.286389, 36.817223] },
+    { id: 2, species: "Mugumo", plantedBy: "Mary", position: [-1.28333, 36.81667] },
+    { id: 3, species: "Neem", plantedBy: "Ali", position: [-1.29, 36.82] },
+  ]);
 
   return (
-    <div className="p-6">
-      <h2 className="text-3xl font-bold text-green-700 mb-4 text-center">
-        🌍 Tree Dashboard
-      </h2>
-      <p className="text-center text-gray-600 mb-6">
-        View planted and adopted trees on the map below.
-      </p>
+    <div className="min-h-screen bg-green-50 text-gray-800 p-4">
+      {/* Header Section */}
+      <h1 className="text-3xl font-bold text-center text-green-800 mb-6">
+        🌳 Trees make a beautiful country. Plant yours!
+      </h1>
 
-      <div
-        className="w-full h-[600px] rounded-lg overflow-hidden shadow-lg border"
-        style={{ height: "600px" }}
-      >
-        <MapContainer
-          center={[-1.286389, 36.817223]} // Nairobi default center
-          zoom={7}
-          style={{ height: "100%", width: "100%" }}
+      {/* Action Buttons */}
+      <div className="flex justify-center gap-8 mb-8">
+        <motion.div
+          whileHover={{ scale: 1.1 }}
+          className="flex flex-col items-center cursor-pointer"
         >
-          <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-          {trees.length > 0 ? (
-            trees.map((tree) => (
-              <Marker
-                key={tree.id}
-                position={[tree.latitude, tree.longitude]}
-              >
+          <div className="bg-green-700 text-white p-5 rounded-full shadow-lg">
+            <FaTree size={30} />
+          </div>
+          <p className="mt-2 text-lg font-semibold">Plant a Tree</p>
+        </motion.div>
+
+        <motion.div
+          whileHover={{ scale: 1.1 }}
+          className="flex flex-col items-center cursor-pointer"
+        >
+          <div className="bg-green-500 text-white p-5 rounded-full shadow-lg">
+            <FaSeedling size={30} />
+          </div>
+          <p className="mt-2 text-lg font-semibold">Adopt a Tree</p>
+        </motion.div>
+      </div>
+
+      {/* Map Section */}
+      <div className="w-full flex justify-center">
+        <div className="w-[90%] h-[60vh] rounded-2xl overflow-hidden shadow-lg">
+          <MapContainer
+            center={[-1.286389, 36.817223]}
+            zoom={13}
+            style={{ height: "100%", width: "100%" }}
+          >
+            <TileLayer
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+            />
+            {trees.map((tree) => (
+              <Marker key={tree.id} position={tree.position}>
                 <Popup>
-                  <strong>🌱 {tree.species}</strong>
-                  <br />
-                  <b>Planted by:</b> {tree.planted_by || "Unknown"}
-                  <br />
-                  <b>Status:</b>{" "}
-                  {tree.adopted ? (
-                    <span className="text-green-700">Adopted 🌿</span>
-                  ) : (
-                    <span className="text-yellow-600">Available 🪴</span>
-                  )}
-                  <br />
-                  <small>
-                    Lat: {tree.latitude}, Lng: {tree.longitude}
-                  </small>
+                  <strong>{tree.species}</strong> <br />
+                  Planted by: {tree.plantedBy}
                 </Popup>
               </Marker>
-            ))
-          ) : (
-            <p className="text-center text-gray-500">No trees found.</p>
-          )}
-        </MapContainer>
+            ))}
+          </MapContainer>
+        </div>
       </div>
     </div>
   );
-}
+};
+
+export default Dashboard;
