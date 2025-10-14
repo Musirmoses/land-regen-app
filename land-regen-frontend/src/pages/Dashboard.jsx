@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import { Leaf, TreePine, Users } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/button";
 
 export default function Dashboard() {
   const [trees, setTrees] = useState([]);
