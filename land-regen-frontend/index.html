@@ -2,48 +2,30 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Land ReGen – Building a Green Future</title>
+    <meta
+      name="description"
+      content="Land Regen — Reclaiming our planet, one root at a time."
+    />
+    <title>Land Regen 🌿</title>
 
-    <!-- Tailwind CSS (Vite will compile it) -->
+    <!-- Favicons -->
+    <link rel="icon" type="image/svg+xml" href="/leaf.svg" />
+
+    <!-- Leaflet CSS for maps -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet/dist/leaflet.css"
+    />
+
+    <!-- Main stylesheet (Tailwind compiled by Vite) -->
     <link rel="stylesheet" href="/src/index.css" />
   </head>
 
-  <body class="bg-gradient-to-b from-green-50 to-white text-gray-800">
-    <div id="root"></div>
+  <body class="bg-green-50 text-gray-900 min-h-screen flex flex-col">
+    <div id="root" class="flex-1"></div>
 
-    <!-- Hero Section -->
-    <section class="text-center py-24 bg-green-100 shadow-inner">
-      <h1 class="text-4xl md:text-5xl font-bold text-green-800 mb-4">
-        🌍 Building a Green Future
-      </h1>
-      <p class="text-lg md:text-xl text-gray-700 mb-8 max-w-2xl mx-auto">
-        Join <strong>Land ReGen</strong> in restoring our planet — one tree at a time. 
-        Plant, adopt, and track trees to nurture a sustainable tomorrow.
-      </p>
-      <div class="flex justify-center gap-6">
-        <a
-          href="/dashboard"
-          class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold shadow-md transition-all duration-300"
-        >
-          🌱 Plant a Tree
-        </a>
-        <a
-          href="/adopt"
-          class="bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-3 rounded-lg font-semibold shadow-md transition-all duration-300"
-        >
-          🌿 Adopt a Tree
-        </a>
-      </div>
-    </section>
-
-    <!-- Optional footer -->
-    <footer class="text-center py-6 text-sm text-gray-600 bg-white border-t mt-12">
-      © 2025 Land ReGen — Together We Grow Greener 🌱
-    </footer>
-
-    <!-- React entrypoint -->
+    <!-- Entry Point -->
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
