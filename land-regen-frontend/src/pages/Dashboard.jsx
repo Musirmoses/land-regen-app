@@ -1,158 +1,172 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import { Leaf, TreePine, Users } from "lucide-react";
 import { Button } from "@/components/button";
+import { fetchTrees, addTree } from "../lib/api";
+import Navbar from "../components/Navbar";
 
 export default function Dashboard() {
   const [trees, setTrees] = useState([]);
   const [newTree, setNewTree] = useState({ lat: "", lng: "", planter: "" });
   const [tokens, setTokens] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [loadingTrees, setLoadingTrees] = useState(true);
 
-  const handleAddTree = (e) => {
+  // 🌱 Load trees on mount
+  useEffect(() => {
+    const loadTrees = async () => {
+      try {
+        const data = await fetchTrees();
+        setTrees(data);
+      } catch (err) {
+        console.error("Failed to load trees:", err);
+      } finally {
+        setLoadingTrees(false);
+      }
+    };
+    loadTrees();
+  }, []);
+
+  // 🌳 Add tree handler
+  const handleAddTree = async (e) => {
     e.preventDefault();
-    if (newTree.lat && newTree.lng && newTree.planter) {
-      setTrees([...trees, newTree]);
-      setTokens(tokens + 10); // Reward for each tree planted
+    if (!newTree.lat || !newTree.lng || !newTree.planter) return;
+    setLoading(true);
+
+    try {
+      const saved = await addTree(newTree);
+      setTrees((prev) => [...prev, saved]);
+      setTokens((prev) => prev + 10);
       setNewTree({ lat: "", lng: "", planter: "" });
+    } catch (err) {
+      console.error("Error adding tree:", err);
+      alert("Failed to save tree. Try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-b from-green-50 to-green-100 text-gray-800">
-      {/* Navbar */}
-      <nav className="flex justify-between items-center px-8 py-4 bg-green-700 text-white shadow-md">
-        <h1 className="text-2xl font-bold">🌿 Greener Earth</h1>
-        <div className="flex gap-6">
-          <a href="#" className="hover:text-green-200">Home</a>
-          <a href="#" className="hover:text-green-200">Plant a Tree</a>
-          <a href="#" className="hover:text-green-200">Adopt</a>
-          <a href="#" className="hover:text-green-200">Dashboard</a>
-        </div>
-      </nav>
+    <div className="min-h-screen bg-gradient-to-b from-green-50 to-green-100 text-gray-800">
+      <Navbar />
 
       {/* Hero Section */}
       <motion.section
-        className="flex flex-col items-center text-center py-12 px-4"
+        className="text-center py-16 px-6 bg-green-700 text-white shadow-md"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ duration: 1 }}
+        transition={{ duration: 0.8 }}
       >
-        <h2 className="text-3xl md:text-4xl font-bold text-green-800">
-          Trees Make a Beautiful Country 🌳
-        </h2>
-        <p className="text-lg mt-2 text-gray-700 max-w-xl">
-          Join the movement to turn deforested lands into lush green havens across our planet.
+        <h1 className="text-4xl md:text-5xl font-bold mb-4">
+          🌳 Land Regen Dashboard
+        </h1>
+        <p className="max-w-2xl mx-auto text-lg leading-relaxed">
+          Monitor, visualize, and grow our collective restoration impact.
+          Together, we’re reclaiming our planet — one root at a time.
         </p>
-
-        {/* Forestation Story */}
-        <div className="mt-8 flex flex-col md:flex-row justify-center gap-8">
-          <motion.img
-            src="https://images.unsplash.com/photo-1581092795360-fd1ca04f7f29?auto=format&fit=crop&w=700&q=60"
-            alt="Deforested area"
-            className="w-72 h-48 object-cover rounded-2xl shadow-lg"
-            whileHover={{ scale: 1.05 }}
-          />
-          <motion.img
-            src="https://images.unsplash.com/photo-1599351432207-7e4d52e4e6b2?auto=format&fit=crop&w=700&q=60"
-            alt="People planting trees"
-            className="w-72 h-48 object-cover rounded-2xl shadow-lg"
-            whileHover={{ scale: 1.05 }}
-          />
-          <motion.img
-            src="https://images.unsplash.com/photo-1506765515384-028b60a970df?auto=format&fit=crop&w=700&q=60"
-            alt="Reforested area"
-            className="w-72 h-48 object-cover rounded-2xl shadow-lg"
-            whileHover={{ scale: 1.05 }}
-          />
-        </div>
       </motion.section>
 
-      {/* Icon Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center py-10 bg-green-200 rounded-t-3xl">
+      {/* Stats */}
+      <div className="grid md:grid-cols-3 gap-6 text-center py-10 bg-green-100 border-t border-b border-green-300">
         <div className="flex flex-col items-center">
-          <TreePine size={48} className="text-green-800" />
-          <h3 className="font-semibold mt-2">Plant a Tree</h3>
+          <TreePine className="text-green-700 mb-2" size={32} />
+          <p className="text-lg font-bold text-green-800">{trees.length}</p>
+          <p className="text-gray-600">Trees Planted</p>
         </div>
         <div className="flex flex-col items-center">
-          <Leaf size={48} className="text-green-700" />
-          <h3 className="font-semibold mt-2">Adopt a Tree</h3>
+          <Leaf className="text-green-700 mb-2" size={32} />
+          <p className="text-lg font-bold text-green-800">{tokens}</p>
+          <p className="text-gray-600">Green Tokens</p>
         </div>
         <div className="flex flex-col items-center">
-          <Users size={48} className="text-green-600" />
-          <h3 className="font-semibold mt-2">Join the Community</h3>
+          <Users className="text-green-700 mb-2" size={32} />
+          <p className="text-lg font-bold text-green-800">Community</p>
+          <p className="text-gray-600">Active Planters</p>
         </div>
       </div>
 
       {/* Map Section */}
-      <div className="flex justify-center py-8">
-        <div className="w-[90%] md:w-[80%] h-[350px] rounded-2xl overflow-hidden shadow-lg border border-green-300">
-          <MapContainer center={[-1.286389, 36.817223]} zoom={6} style={{ height: "100%", width: "100%" }}>
-            <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>'
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            />
-            {trees.map((tree, index) => (
-              <Marker key={index} position={[parseFloat(tree.lat), parseFloat(tree.lng)]}>
-                <Popup>
-                  <strong>Tree planted by:</strong> {tree.planter}
-                </Popup>
-              </Marker>
-            ))}
-          </MapContainer>
+      <section className="flex justify-center py-10">
+        <div className="w-[90%] md:w-[80%] h-[400px] rounded-2xl overflow-hidden shadow-lg border border-green-300 bg-white">
+          {loadingTrees ? (
+            <div className="flex items-center justify-center h-full text-green-600 font-medium">
+              Loading tree data...
+            </div>
+          ) : (
+            <MapContainer
+              center={[-1.286389, 36.817223]}
+              zoom={6}
+              style={{ height: "100%", width: "100%" }}
+            >
+              <TileLayer
+                attribution='&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              />
+              {trees.map((tree, index) => (
+                <Marker
+                  key={index}
+                  position={[parseFloat(tree.lat), parseFloat(tree.lng)]}
+                >
+                  <Popup>
+                    <strong>Tree planted by:</strong> {tree.planter}
+                  </Popup>
+                </Marker>
+              ))}
+            </MapContainer>
+          )}
         </div>
-      </div>
+      </section>
 
       {/* Add Tree Form */}
-      <section className="px-6 md:px-12 py-10 bg-green-50 rounded-xl shadow-inner mb-8">
-        <h3 className="text-xl font-bold text-green-700 mb-4">🌱 Add Your Tree</h3>
+      <section className="container mx-auto py-12 px-6 bg-white rounded-xl shadow-inner mb-8">
+        <h3 className="text-2xl font-bold text-green-700 mb-6 text-center">
+          🌱 Add Your Tree
+        </h3>
         <form
           onSubmit={handleAddTree}
-          className="grid grid-cols-1 md:grid-cols-3 gap-4"
+          className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-3xl mx-auto"
         >
           <input
             type="text"
             placeholder="Latitude"
             value={newTree.lat}
             onChange={(e) => setNewTree({ ...newTree, lat: e.target.value })}
-            className="p-2 border rounded"
+            className="p-3 border rounded-lg shadow-sm"
           />
           <input
             type="text"
             placeholder="Longitude"
             value={newTree.lng}
             onChange={(e) => setNewTree({ ...newTree, lng: e.target.value })}
-            className="p-2 border rounded"
+            className="p-3 border rounded-lg shadow-sm"
           />
           <input
             type="text"
             placeholder="Your Name"
             value={newTree.planter}
             onChange={(e) => setNewTree({ ...newTree, planter: e.target.value })}
-            className="p-2 border rounded"
+            className="p-3 border rounded-lg shadow-sm"
           />
-          <Button type="submit" className="col-span-full bg-green-600 hover:bg-green-700">
-            Add Tree
+          <Button
+            type="submit"
+            className="col-span-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-lg"
+            disabled={loading}
+          >
+            {loading ? "Saving..." : "Add Tree 🌿"}
           </Button>
         </form>
 
-        <div className="text-center mt-4 text-green-700 font-medium">
-          🎁 You’ve earned <strong>{tokens}</strong> Green Tokens for planting trees!
+        <div className="text-center mt-6 text-green-700 font-medium">
+          🎁 You’ve earned <strong>{tokens}</strong> Green Tokens for planting
+          trees!
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="bg-green-700 text-white py-8 px-6 text-center">
-        <h4 className="text-xl font-bold mb-2">SDG 15 – Life on Land 🌍</h4>
-        <p className="max-w-2xl mx-auto text-sm">
-          Protecting, restoring, and promoting sustainable use of terrestrial ecosystems
-          is essential for human survival. Every tree planted contributes to biodiversity,
-          combats desertification, and secures a greener, more resilient future.
-        </p>
-        <p className="mt-4 text-sm text-green-200">
-          Together, we grow stronger. Together, we grow greener. 🌿
-        </p>
+      <footer className="text-center py-8 text-sm text-gray-600 border-t">
+        © 2025 Land Regen — Growing together for a sustainable future 🌱
       </footer>
     </div>
   );

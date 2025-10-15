@@ -1,70 +1,81 @@
-import { useState } from "react";
-import { supabase } from "../lib/supabaseClient";
+import React, { useState } from "react";
+import { addTree } from "../lib/api";
 
 export default function AddTree() {
-  const [species, setSpecies] = useState("");
-  const [latitude, setLatitude] = useState("");
-  const [longitude, setLongitude] = useState("");
-  const [plantedBy, setPlantedBy] = useState("");
-  const [message, setMessage] = useState("");
+  const [form, setForm] = useState({
+    species: "",
+    latitude: "",
+    longitude: "",
+    planted_by: "",
+  });
+
+  const [status, setStatus] = useState("");
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const { error } = await supabase
-      .from("trees")
-      .insert([{ species, latitude, longitude, planted_by: plantedBy, adopted: false }]);
-    if (error) {
-      setMessage("❌ Error planting tree: " + error.message);
-    } else {
-      setMessage("✅ Tree added successfully!");
-      setSpecies("");
-      setLatitude("");
-      setLongitude("");
-      setPlantedBy("");
+    setStatus("Saving...");
+    try {
+      const res = await addTree(form);
+      setStatus("✅ Tree added successfully!");
+      console.log(res);
+    } catch (err) {
+      console.error(err);
+      setStatus("❌ Error saving tree.");
     }
   };
 
   return (
-    <div className="container mx-auto py-10">
-      <h2 className="text-3xl font-bold mb-6 text-center text-green-700">🌱 Plant a Tree</h2>
-      <form onSubmit={handleSubmit} className="max-w-md mx-auto bg-white shadow-lg rounded-lg p-6">
+    <div className="p-6 max-w-lg mx-auto">
+      <h2 className="text-2xl font-bold mb-4">Add New Tree</h2>
+      <form onSubmit={handleSubmit} className="space-y-4">
         <input
           type="text"
-          placeholder="Tree Species"
-          value={species}
-          onChange={(e) => setSpecies(e.target.value)}
-          className="border p-2 w-full mb-4 rounded"
+          name="species"
+          placeholder="Species"
+          value={form.species}
+          onChange={handleChange}
+          className="w-full border rounded p-2"
           required
         />
         <input
           type="text"
+          name="latitude"
           placeholder="Latitude"
-          value={latitude}
-          onChange={(e) => setLatitude(e.target.value)}
-          className="border p-2 w-full mb-4 rounded"
+          value={form.latitude}
+          onChange={handleChange}
+          className="w-full border rounded p-2"
           required
         />
         <input
           type="text"
+          name="longitude"
           placeholder="Longitude"
-          value={longitude}
-          onChange={(e) => setLongitude(e.target.value)}
-          className="border p-2 w-full mb-4 rounded"
+          value={form.longitude}
+          onChange={handleChange}
+          className="w-full border rounded p-2"
           required
         />
         <input
           type="text"
-          placeholder="Planted By"
-          value={plantedBy}
-          onChange={(e) => setPlantedBy(e.target.value)}
-          className="border p-2 w-full mb-4 rounded"
+          name="planted_by"
+          placeholder="Planted by"
+          value={form.planted_by}
+          onChange={handleChange}
+          className="w-full border rounded p-2"
           required
         />
-        <button type="submit" className="bg-green-600 text-white px-4 py-2 rounded w-full">
-          Add Tree
+        <button
+          type="submit"
+          className="bg-green-600 text-white px-4 py-2 rounded"
+        >
+          Save Tree
         </button>
       </form>
-      {message && <p className="text-center mt-4 text-green-600">{message}</p>}
+      {status && <p className="mt-3">{status}</p>}
     </div>
   );
 }
