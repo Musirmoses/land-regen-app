@@ -1,45 +1,29 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 from supabase import create_client, Client
 from dotenv import load_dotenv
-from pathlib import Path
 import os
 
-# ============================================================
-# 🔹 1. Load environment variables from .env
-# ============================================================
-env_path = Path(__file__).resolve().parent.parent / ".env"
-
-if load_dotenv(dotenv_path=env_path):
-    print("✅ .env file loaded successfully.")
-else:
-    print(f"⚠️ Could not load .env file at: {env_path}")
-
+# === Load environment variables ===
+load_dotenv()
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 
 if not SUPABASE_URL or not SUPABASE_KEY:
     raise ValueError("❌ Missing Supabase credentials. Please check .env or Render environment variables.")
-else:
-    print("✅ Supabase credentials loaded successfully!")
 
-# ============================================================
-# 🔹 2. Initialize Supabase client
-# ============================================================
+# === Create Supabase client ===
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-# ============================================================
-# 🔹 3. Initialize FastAPI app
-# ============================================================
-app = FastAPI(title="Land Regen API", version="1.0")
+# === Initialize FastAPI ===
+app = FastAPI(title="Land Regen Backend", version="1.0.0")
 
-# ============================================================
-# 🔹 4. CORS setup — allow frontend to connect
-# ============================================================
+# === CORS Settings ===
 origins = [
-    "http://localhost:5173",  # Vite local
+    "http://localhost:5173",  # dev
     "http://127.0.0.1:5173",
-    "https://land-regen.netlify.app",  # your Netlify frontend (update if different)
+    "https://your-netlify-site.netlify.app",  # production
 ]
 
 app.add_middleware(
@@ -50,25 +34,44 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ============================================================
-# 🔹 5. Sample routes
-# ============================================================
+# === Data Models ===
+class TreeIn(BaseModel):
+    species: str
+    latitude: float
+    longitude: float
+    planted_by: str
 
+# === Routes ===
 @app.get("/")
-def read_root():
-    return {"message": "🌱 Land Regen API is running successfully!"}
+def home():
+    return {"message": "🌱 Land Regen API is live!"}
 
+@app.get("/health")
+def health():
+    return {"status": "ok"}
 
-@app.get("/test_supabase")
-def test_supabase():
-    """Simple route to test your Supabase connection"""
+@app.get("/trees")
+def get_trees():
     try:
-        data = supabase.table("profiles").select("*").limit(1).execute()
-        return {"message": "✅ Supabase connection OK", "data": data.data}
+        res = supabase.table("trees").select("*").execute()
+        return {"data": res.data}
     except Exception as e:
-        return {"error": str(e)}
+        raise HTTPException(status_code=500, detail=str(e))
 
-# ============================================================
-# 🔹 6. Run with:
-# uvicorn app.main:app --reload
-# ============================================================
+@app.post("/trees")
+def add_tree(tree: TreeIn):
+    try:
+        res = supabase.table("trees").insert(tree.dict()).execute()
+        return {"data": res.data, "message": "Tree added successfully!"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/trees/{tree_id}")
+def get_tree(tree_id: int):
+    try:
+        res = supabase.table("trees").select("*").eq("id", tree_id).execute()
+        if not res.data:
+            raise HTTPException(status_code=404, detail="Tree not found")
+        return {"data": res.data[0]}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
