@@ -12,6 +12,7 @@ It uses **React + Leaflet + Supabase** to visualize tree planting data, showcase
 🔗 **Live Site:** [https://land-regen.netlify.app](https://land-regen.netlify.app)  
 🎨 **Canva MVP Presentation:** <https://www.canva.com/design/DAG1qFSTM9k/-NelxJ53huNPHk6Hkz_4rw/edit?utm_content=DAG1qFSTM9k&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton
 
+//Backend - https://land-regen-backend.onrender.com/
 ---
 
 ## 🧭 Project Overview
